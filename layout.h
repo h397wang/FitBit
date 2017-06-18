@@ -19,8 +19,6 @@
 //!
 //! Thanks so much for partipating! Good luck!
 
-#define NULL 0
-
 struct Position {
     int x;
     int y;
@@ -62,9 +60,4 @@ struct Position layout_get_position_for_node(struct Layout* layout, struct Layou
 //! @return the absolute position for the node with the given name
 struct Position layout_get_position_for_name(struct Layout* layout, const char* name);
 //! @return the absolute position for the node with the given id
-struct Position layout_get_position_for_id(struct Layout* layout, int id);
-
-// My helper functions
-void DFSByName(struct LayoutNode* node, const char* name, struct Position* posPtr);
-void DFSById(struct LayoutNode* node, const int id, struct Position* posPtr);
-void updateChildrenAbsPositions(struct LayoutNode* node, struct Position deltaPosition); 
+struct Position layout_get_position_for_id(struct Layout* layout, int id); 
