@@ -6,7 +6,8 @@
 void DFSByName(struct LayoutNode* node, const char* name, struct Position* posPtr);
 void DFSById(struct LayoutNode* node, const int id, struct Position* posPtr);
 void updateChildrenAbsPositions(struct LayoutNode* node, struct Position deltaPosition);
-
+void addPositions(struct Position* ret, struct Position p1, struct Position p2);
+void subtractPositions(struct Position* ret, struct Position p1, struct Position p2);
 
 //! Initialize node with the given values
 //! @param node the node to initialize
@@ -33,8 +34,7 @@ void layout_init(struct Layout* layout, struct LayoutNode* root) {
 //! Adding a child takes O(1) time
 void layout_add_child(struct Layout* layout, struct LayoutNode* parent, struct LayoutNode* child) {
 	struct Position childAbsPosition;
-	childAbsPosition.x = parent->absolutePosition.x + child->relativePosition.x;
-	childAbsPosition.y = parent->absolutePosition.y + child->relativePosition.y;
+	addPositions(&childAbsPosition, parent->absolutePosition, child->relativePosition);
 	child->absolutePosition = childAbsPosition;
 
 	if (parent->childrenHeadPtr == NULL) { // parent has no children
@@ -51,11 +51,8 @@ void layout_node_update_position(struct Layout* layout, struct LayoutNode* node,
 	struct Position deltaPosition;
 	struct Position newAbsPosition;
 
-	deltaPosition.x = position.x - node->relativePosition.x;
-	deltaPosition.y = position.y - node->relativePosition.y;
-	
-	newAbsPosition.x = node->absolutePosition.x + deltaPosition.x;
-	newAbsPosition.y = node->absolutePosition.y + deltaPosition.y;
+	subtractPositions(&deltaPosition, position, node->relativePosition);
+	addPositions(&newAbsPosition, node->absolutePosition, deltaPosition);
 
 	node->absolutePosition = newAbsPosition;
 	node->relativePosition = position;
@@ -85,12 +82,14 @@ struct Position layout_get_position_for_name(struct Layout* layout, const char* 
 struct Position layout_get_position_for_id(struct Layout* layout, int id) {
 	struct Position ret;
 
-	if (layout->rootPtr->id == id) { // not deep copied so this works
+	if (layout->rootPtr->id == id) { 
 		return layout->rootPtr->absolutePosition;
 	} 
 	DFSById(layout->rootPtr, id, &ret);
 	return ret;
 }
+
+//! My helper functions
 
 void DFSByName(struct LayoutNode* node, const char* name, struct Position* posPtr) {
 	struct LayoutNode* currentChildPtr;
@@ -127,9 +126,18 @@ void updateChildrenAbsPositions(struct LayoutNode* node, struct Position deltaPo
 
 	currentChildPtr = node->childrenHeadPtr;
 	while (currentChildPtr != NULL) {
-		currentChildPtr->absolutePosition.x += deltaPosition.x;
-		currentChildPtr->absolutePosition.y += deltaPosition.y;
+		addPositions(&(currentChildPtr->absolutePosition), currentChildPtr->absolutePosition, deltaPosition);
 		updateChildrenAbsPositions(currentChildPtr, deltaPosition);
 		currentChildPtr = currentChildPtr->nextSiblingPtr;
 	}
+}
+
+void addPositions(struct Position* ret, struct Position p1, struct Position p2) {
+	ret->x = p1.x + p2.x;
+	ret->y = p1.y + p2.y;
+}
+
+void subtractPositions(struct Position* ret, struct Position p1, struct Position p2) {
+	ret->x = p1.x - p2.x;
+	ret->y = p1.y - p2.y;
 }
