@@ -1,12 +1,13 @@
 #include "layout.h"
 #include <stdio.h>
 
+#define FOUND 1
+#define NOT_FOUND 0
 
-// My helper functions
-void DFSByName(struct LayoutNode* node, const char* name, struct Position* posPtr);
-void DFSById(struct LayoutNode* node, const int id, struct Position* posPtr);
+//! Forward declarations for my helper functions 
+int DFSByName(struct LayoutNode* node, const char* name, struct Position* posPtr);
+int DFSById(struct LayoutNode* node, const int id, struct Position* posPtr);
 void updateChildrenAbsPositions(struct LayoutNode* node, struct Position deltaPosition);
-
 
 //! Initialize node with the given values
 //! @param node the node to initialize
@@ -32,11 +33,9 @@ void layout_init(struct Layout* layout, struct LayoutNode* root) {
 //! Add an intialized node as the child of another node already in the Layout tree
 //! Adding a child takes O(1) time
 void layout_add_child(struct Layout* layout, struct LayoutNode* parent, struct LayoutNode* child) {
-	struct Position childAbsPosition;
-	childAbsPosition.x = parent->absolutePosition.x + child->relativePosition.x;
-	childAbsPosition.y = parent->absolutePosition.y + child->relativePosition.y;
-	child->absolutePosition = childAbsPosition;
-
+	child->absolutePosition.x = parent->absolutePosition.x + child->relativePosition.x;
+	child->absolutePosition.y = parent->absolutePosition.y + child->relativePosition.y;
+	
 	if (parent->childrenHeadPtr == NULL) { // parent has no children
 		parent->childrenHeadPtr = child;
 		parent->childrenEndPtr = child;
@@ -46,14 +45,15 @@ void layout_add_child(struct Layout* layout, struct LayoutNode* parent, struct L
 }
 
 //! Change the position of a node. This should work whether or not the node is already in a tree
-//! Updating the position of some node takes O(n) time because all child nodes must be updated
+//! Updating the position of some node in the tree takes O(n) time because all child nodes must be updated
+//! Implementation accounts for the case if the node is not in the layout
 void layout_node_update_position(struct Layout* layout, struct LayoutNode* node, struct Position position) {
 	struct Position deltaPosition;
 	struct Position newAbsPosition;
 
 	deltaPosition.x = position.x - node->relativePosition.x;
 	deltaPosition.y = position.y - node->relativePosition.y;
-	
+
 	newAbsPosition.x = node->absolutePosition.x + deltaPosition.x;
 	newAbsPosition.y = node->absolutePosition.y + deltaPosition.y;
 
@@ -64,7 +64,7 @@ void layout_node_update_position(struct Layout* layout, struct LayoutNode* node,
 }
 
 //! @return the absolute position for the node with the given memory address
-//! O(1) runtime as the absolute position is calculated when added
+//! O(1) runtime as the absolute position is already calculated and stored when added
 struct Position layout_get_position_for_node(struct Layout* layout, struct LayoutNode* node) {
 	return node->absolutePosition; 
 }
@@ -85,41 +85,49 @@ struct Position layout_get_position_for_name(struct Layout* layout, const char* 
 struct Position layout_get_position_for_id(struct Layout* layout, int id) {
 	struct Position ret;
 
-	if (layout->rootPtr->id == id) { // not deep copied so this works
+	if (layout->rootPtr->id == id) {
 		return layout->rootPtr->absolutePosition;
 	} 
 	DFSById(layout->rootPtr, id, &ret);
 	return ret;
 }
 
-void DFSByName(struct LayoutNode* node, const char* name, struct Position* posPtr) {
+//! Implementations of my helper functions
+int DFSByName(struct LayoutNode* node, const char* name, struct Position* posPtr) {
 	struct LayoutNode* currentChildPtr;
 
 	currentChildPtr = node->childrenHeadPtr;
 	while (currentChildPtr != NULL) {
 		if (currentChildPtr->name == name) {
 			*posPtr = currentChildPtr->absolutePosition;
-			return;
+			return FOUND;
 		} else {
-			DFSByName(currentChildPtr, name, posPtr);
+			if (DFSByName(currentChildPtr, name, posPtr)) { 
+				return FOUND; // return early if found
+			} // otherwise, onto the sibling
 		}
 		currentChildPtr = currentChildPtr->nextSiblingPtr;
 	}
+	return NOT_FOUND;
 }
 
-void DFSById(struct LayoutNode* node, const int id, struct Position* posPtr) {
+// Unforturnate instance of code repetition
+int DFSById(struct LayoutNode* node, const int id, struct Position* posPtr) {
 	struct LayoutNode* currentChildPtr;
 
 	currentChildPtr = node->childrenHeadPtr;
 	while (currentChildPtr != NULL) {
 		if (currentChildPtr->id == id) {
 			*posPtr = currentChildPtr->absolutePosition;
-			return;
+			return FOUND;
 		} else {
-			DFSById(currentChildPtr, id, posPtr);
+			if (DFSById(currentChildPtr, id, posPtr)) {
+				return FOUND;
+			}
 		}
 		currentChildPtr = currentChildPtr->nextSiblingPtr;
 	}
+	return NOT_FOUND;
 }
 
 void updateChildrenAbsPositions(struct LayoutNode* node, struct Position deltaPosition) {

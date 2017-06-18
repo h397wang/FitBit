@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
     struct Layout layout;
 
     struct LayoutNode root_node;
-    struct LayoutNode node_a, node_b;
+    struct LayoutNode node_a, node_b, node_c;
     struct LayoutNode node_aa;
 
     layout_node_init(&root_node, "r", 0, (struct Position) { .x = 10, .y = 10 });
@@ -49,6 +49,9 @@ int main(int argc, char** argv) {
     pos_b = layout_get_position_for_node(&layout, &node_b);
     printf("Node b should be (20, 40), got (%u, %u)\n", pos_b.x, pos_b.y);
 
-       
+    layout_node_init(&node_c, "c", 5, (struct Position) { .x = 10, .y = 10 });
+    layout_node_update_position(&layout, &node_c, (struct Position) { .x = 0, .y = 0 });
+    struct Position pos_c = layout_get_position_for_node(&layout, &node_c);
+    printf("Node c should be (0, 0), got (%u, %u)\n", pos_c.x, pos_c.y);       
 }
 

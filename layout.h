@@ -46,15 +46,12 @@ struct Layout {
 //! @param id An id for the node
 //! @param position A relative position for this node with respect to it's parent
 void layout_node_init(struct LayoutNode* node, const char* name, int id, struct Position position);
-
 //! Add an initialized node as the root of the tree
 void layout_init(struct Layout* layout, struct LayoutNode* root);
 //! Add an intialized node as the child of another node already in the Layout tree
 void layout_add_child(struct Layout* layout, struct LayoutNode* parent, struct LayoutNode* child);
-
 //! Change the position of a node. This should work whether or not the node is already in a tree
 void layout_node_update_position(struct Layout* layout, struct LayoutNode* node, struct Position position);
-
 //! @return the absolute position for the node with the given memory address
 struct Position layout_get_position_for_node(struct Layout* layout, struct LayoutNode* node);
 //! @return the absolute position for the node with the given name
