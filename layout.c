@@ -53,10 +53,8 @@ void layout_node_update_position(struct Layout* layout, struct LayoutNode* node,
 
 	subtractPositions(&deltaPosition, position, node->relativePosition);
 	addPositions(&newAbsPosition, node->absolutePosition, deltaPosition);
-
 	node->absolutePosition = newAbsPosition;
 	node->relativePosition = position;
-
 	updateChildrenAbsPositions(node, deltaPosition);
 }
 
