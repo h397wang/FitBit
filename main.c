@@ -49,9 +49,19 @@ int main(int argc, char** argv) {
     pos_b = layout_get_position_for_node(&layout, &node_b);
     printf("Node b should be (20, 40), got (%u, %u)\n", pos_b.x, pos_b.y);
 
+    // Update the position of a node not in the tree
     layout_node_init(&node_c, "c", 5, (struct Position) { .x = 10, .y = 10 });
-    layout_node_update_position(&layout, &node_c, (struct Position) { .x = 0, .y = 0 });
+    layout_node_update_position(&layout, &node_c, (struct Position) { .x = 20, .y = 20 });
     struct Position pos_c = layout_get_position_for_node(&layout, &node_c);
-    printf("Node c should be (0, 0), got (%u, %u)\n", pos_c.x, pos_c.y);       
-}
+    printf("Node c should be (20, 20), got (%u, %u)\n", pos_c.x, pos_c.y);
 
+    // Add a third child to the root node
+    layout_add_child(&layout, &root_node, &node_c);
+    layout_node_update_position(&layout, &root_node, (struct Position) { .x = 100, .y = 100 });
+    pos_c = layout_get_position_for_node(&layout, &node_c);
+    printf("Node c should be (120, 120), got (%u, %u)\n", pos_c.x, pos_c.y);
+
+    // Make sure child b is still good
+    pos_b = layout_get_position_for_node(&layout, &node_b);
+    printf("Node b should be (120, 140), got (%u, %u)\n", pos_b.x, pos_b.y);
+}

@@ -41,6 +41,7 @@ void layout_add_child(struct Layout* layout, struct LayoutNode* parent, struct L
 		parent->childrenEndPtr = child;
 	} else { // parent has at least one child
 		parent->childrenEndPtr->nextSiblingPtr = child;
+		parent->childrenEndPtr = child;
 	}
 }
 
